@@ -1,44 +1,105 @@
 #include "main.h"
+#include "stdio.h"
 
-/**
- * _printf - printf function
- * @format: const char pointer
- * Return: b_len
- */
-int _printf(const char *format, ...)
+int _printf(char *format, ...)
 {
-	int (*pfunc)(va_list, flags_t *);
-	const char *p;
-	va_list arguments;
-	flags_t flags = {0, 0, 0};
+    va_list ap;
+    va_start(ap, format);
+    char buffer[100];
+    int state = 0;
+    int i = 0, count = 0;
 
-	register int count = 0;
+    while (format && format[i])
+    {
+        if (state == 0)
+        {
+            if (*format != '%' && *format != '\n')
+            {
+                _putchar(*format);
+                count++;
+            }
+            else if (*format == '\n')
+            {
+                putchar('\n');
+                count++;
+            }
 
-	va_start(arguments, format);
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	for (p = format; *p; p++)
-	{
-		if (*p == '%')
-		{
-			p++;
-			if (*p == '%')
-			{
-				count += _putchar('%');
-				continue;
-			}
-			while (get_flag(*p, &flags))
-				p++;
-			pfunc = get_print(*p);
-			count += (pfunc)
-				? pfunc(arguments, &flags)
-				: _printf("%%%c", *p);
-		} else
-			count += _putchar(*p);
-	}
-	_putchar(-1);
-	va_end(arguments);
-	return (count);
+            else
+            {
+                state = 1;
+            }
+        }
+        else if (state == 1)
+        {
+            switch (*format)
+            {
+            case 's':
+            {
+                char *str = va_arg(ap, char *);
+                //_puts(str);
+                while (*str)
+                {
+                    _putchar(*str++);
+                    count++;
+                }
+                break;
+            }
+            case 'c':
+            {
+                int ch = va_arg(ap, int);
+                _putchar(ch);
+                count++;
+                break;
+            }
+            case 'd':
+            {
+                int ch = va_arg(ap, int);
+                char buff[100];
+                char *buff1 = itoa(ch, buff, 10);
+                while (*buff1)
+                {
+                    count++;
+                    putchar(*buff1++);
+                }
+
+                break;
+            }
+            case 'i':
+            {
+                int ch = va_arg(ap, int);
+                char buff[100];
+                char *buff1 = itoa(ch, buff, 10);
+                while (*buff1)
+                {
+                    count++;
+                    putchar(*buff1++);
+                }
+
+                break;
+            }
+            case '%':
+            {
+
+                _putchar('%');
+                count++;
+                break;
+            }
+            }
+            state = 0;
+        }
+
+        format++;
+    }
+    va_end(ap);
+
+    return (count);
+}
+
+int main()
+{
+    int len = _printf("Let's try to printf a simple sentence .\n");
+    int len2 = printf("Let's try to printf a simple sentence .\n");
+
+    _printf("Length:[%i]\n", len);
+    printf("Length:[%d]\n", len2);
 }
