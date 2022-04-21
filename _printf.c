@@ -1,4 +1,9 @@
+#include <stdarg.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <unistd.h>
 #include "main.h"
+
 /**
  * _printf - printf function
  * @format: const char pointer
@@ -6,38 +11,35 @@
  */
 int _printf(const char *format, ...)
 {
-	int (*pfunc)(va_list, flags_t *);
-	const char *p;
-	va_list arguments;
-	flags_t flags = {0, 0, 0};
+	va_list list;
+	int i = 0;
+	int  j = 0;
+	char *dest;
 
-	register int count = 0;
-
-	va_start(arguments, format);
-	if (!format || (format[0] == '%' && !format[1]))
-		return (-1);
-	if (format[0] == '%' && format[1] == ' ' && !format[2])
-		return (-1);
-	for (p = format; *p; p++)
+	dest = malloc(sizeof(char) * 1500);
+	if (dest == NULL)
+		return (1);
+	va_start(list, format);
+	while (format[i] != '\0')
 	{
-		if (*p == '%')
+		if (format[i] == '%')
 		{
-			p++;
-			if (*p == '%')
+			i++;
+			if (format[i] == 'c')
 			{
-				count += _putchar('%');
-				continue;
+				dest[j] = (char)va_arg(list, int);
+				j++;
 			}
-			while (get_flag(*p, &flags))
-				p++;
-			pfunc = get_print(*p);
-			count += (pfunc)
-				? pfunc(arguments, &flags)
-				: _printf("%%%c", *p);
-		} else
-			count += _putchar(*p);
+		}
+		else
+		{
+			dest[j] = format[i];
+			j++;
+		}
+		i++;
 	}
-	_putchar(-1);
-	va_end(arguments);
-	return (count);
+	write(1, dest, i++);
+	va_end(list);
+	free(dest);
+	return (i);
 }
